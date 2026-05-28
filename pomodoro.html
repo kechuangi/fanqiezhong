@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>番茄钟</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+      color: #33272a;
+      background: linear-gradient(135deg, #fff7f0, #f1dfd8);
+    }
+    .app {
+      width: min(420px, calc(100vw - 32px));
+      padding: 28px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 24px 80px rgba(80, 50, 42, .16);
+      text-align: center;
+    }
+    h1 { margin: 0 0 10px; font-size: 32px; }
+    .mode { color: #d64242; font-weight: 700; }
+    .time {
+      margin: 18px 0;
+      color: #d64242;
+      font-family: Consolas, monospace;
+      font-size: 76px;
+      font-weight: 800;
+      letter-spacing: -2px;
+    }
+    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+    button, input {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px;
+      font: inherit;
+    }
+    button { cursor: pointer; background: #ead8d1; color: #3d2c2e; }
+    button.primary { background: #d64242; color: white; }
+    label { display: grid; gap: 6px; color: #6f5d5d; font-size: 13px; font-weight: 700; text-align: left; }
+    input { width: 100%; background: #fff9f6; border: 1px solid #e4d1ca; }
+    .settings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 24px; }
+    .hint { min-height: 24px; margin: 16px 0 0; color: #6f5d5d; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>番茄钟</h1>
+    <div id="mode" class="mode">专注时间</div>
+    <div id="time" class="time">25:00</div>
+    <div class="row">
+      <button id="start" class="primary">开始</button>
+      <button id="reset">重置</button>
+      <button id="skip">跳过</button>
+    </div>
+    <p id="hint" class="hint">准备开始专注。</p>
+    <section class="settings">
+      <label>专注<input id="work" type="number" min="1" value="25"></label>
+      <label>短休<input id="short" type="number" min="1" value="5"></label>
+      <label>长休<input id="long" type="number" min="1" value="15"></label>
+    </section>
+  </main>
+
+  <script>
+    const el = {
+      mode: document.querySelector('#mode'),
+      time: document.querySelector('#time'),
+      start: document.querySelector('#start'),
+      reset: document.querySelector('#reset'),
+      skip: document.querySelector('#skip'),
+      hint: document.querySelector('#hint'),
+      work: document.querySelector('#work'),
+      short: document.querySelector('#short'),
+      long: document.querySelector('#long'),
+    };
+
+    let mode = 'work';
+    let running = false;
+    let seconds = 25 * 60;
+    let rounds = 0;
+    let timer = null;
+
+    function minutes(id) {
+      return Math.max(1, Math.round(Number(el[id].value) || 1));
+    }
+
+    function duration(nextMode = mode) {
+      if (nextMode === 'work') return minutes('work') * 60;
+      if (nextMode === 'short') return minutes('short') * 60;
+      return minutes('long') * 60;
+    }
+
+    function label() {
+      return mode === 'work' ? '专注时间' : mode === 'short' ? '短休息' : '长休息';
+    }
+
+    function paint() {
+      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      el.mode.textContent = label();
+      el.time.textContent = `${m}:${s}`;
+      el.start.textContent = running ? '暂停' : seconds === duration() ? '开始' : '继续';
+      document.title = `${el.time.textContent} - 番茄钟`;
+    }
+
+    function beep() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, .2, .4].forEach(offset => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(.001, ctx.currentTime + offset);
+        gain.gain.exponentialRampToValueAtTime(.25, ctx.currentTime + offset + .03);
+        gain.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + offset + .16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + offset);
+        osc.stop(ctx.currentTime + offset + .18);
+      });
+    }
+
+    function switchTo(nextMode) {
+      mode = nextMode;
+      seconds = duration();
+      running = false;
+      paint();
+    }
+
+    function finish(playSound = true) {
+      if (playSound) beep();
+      if (mode === 'work') {
+        rounds += 1;
+        const next = rounds % 4 === 0 ? 'long' : 'short';
+        el.hint.textContent = next === 'long' ? '专注完成，进入长休息。' : '专注完成，短暂休息。';
+        switchTo(next);
+      } else {
+        el.hint.textContent = '休息结束，开始新的专注吧。';
+        switchTo('work');
+      }
+    }
+
+    function tick() {
+      if (!running) return;
+      seconds -= 1;
+      if (seconds <= 0) finish(true);
+      paint();
+    }
+
+    el.start.onclick = () => {
+      running = !running;
+      if (!timer) timer = setInterval(tick, 1000);
+      el.hint.textContent = running ? '正在计时。' : '已暂停。';
+      paint();
+    };
+    el.reset.onclick = () => {
+      running = false;
+      rounds = 0;
+      mode = 'work';
+      seconds = duration('work');
+      el.hint.textContent = '已重置。';
+      paint();
+    };
+    el.skip.onclick = () => finish(false);
+    ['work', 'short', 'long'].forEach(id => el[id].onchange = () => {
+      if (!running) seconds = duration();
+      paint();
+    });
+
+    paint();
+  </script>
+</body>
+</html>

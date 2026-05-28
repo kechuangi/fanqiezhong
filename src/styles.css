@@ -1,0 +1,163 @@
+:root {
+  color: #33272a;
+  background: #f7f2ef;
+  font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 420px;
+  min-height: 560px;
+  background: radial-gradient(circle at top, #fff7f0 0, #f7f2ef 42%, #efe4de 100%);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.timer-card,
+.settings-card {
+  border: 1px solid rgba(80, 52, 46, 0.1);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 24px 80px rgba(86, 50, 42, 0.12);
+}
+
+.timer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 24px;
+}
+
+.mode-pill {
+  border-radius: 999px;
+  padding: 8px 16px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, white);
+  font-weight: 700;
+}
+
+h1 {
+  margin: 18px 0 10px;
+  font-size: 32px;
+}
+
+.time {
+  margin: 8px 0 18px;
+  color: var(--accent);
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-size: 72px;
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+.progress {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #efe2dd;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+
+.message {
+  min-height: 24px;
+  margin: 18px 0 4px;
+  color: #5d4a48;
+}
+
+.rounds {
+  margin: 0 0 22px;
+  color: #8a7570;
+  font-size: 14px;
+}
+
+.controls {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 10px;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 14px;
+  color: #4b3836;
+  background: #f0e2dc;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(86, 50, 42, 0.14);
+}
+
+button.primary,
+button.save {
+  color: white;
+  background: var(--accent);
+}
+
+.settings-card {
+  margin-top: 18px;
+  padding: 22px;
+}
+
+h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #6c5753;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  border: 1px solid #e3d1cb;
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: #3f302e;
+  background: #fffaf7;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.save {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
